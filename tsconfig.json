@@ -1,0 +1,10 @@
+{
+  "extends": "./node_modules/@mc/tsconfig-node/tsconfig.base.json",
+  "exclude": ["node_modules", "dist", "test", "**/*spec.ts"],
+  "include": ["./src/**/*.ts"],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "strictNullChecks": true,
+    "baseUrl": "./"
+  }
+}

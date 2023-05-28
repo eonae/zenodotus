@@ -1,0 +1,52 @@
+image: docker:23.0.1
+
+services:
+  - docker:23.0.1-dind
+
+variables:
+  DOCKERFILE: .docker/Dockerfile.build
+  COMPOSEFILE: .docker/docker-compose.yml
+  MC_MICROCORE_GRPC_ADDRESS: $MC_MICROCORE_GRPC_ADDRESS
+  
+stages:
+  - build_image
+  - deploy
+
+build_image:
+  stage: build_image
+  before_script:
+    - echo $HARBOR_PASSWORD | docker login $HARBOR_HOST --username $HARBOR_USERNAME --password-stdin
+  script:
+    - docker pull $HARBOR_HOST/$HARBOR_PROJECT/$CI_PROJECT_NAME:latest || true
+    - docker build -f $DOCKERFILE --build-arg MC_GRAPHQL_GATEWAY_GRAPHQL_ENABLE_PLAYGROUND="$MC_GRAPHQL_GATEWAY_GRAPHQL_ENABLE_PLAYGROUND" --build-arg VOYAGER_INTROSPECTION_ENDPOINT="$VOYAGER_INTROSPECTION_ENDPOINT" --cache-from $HARBOR_HOST/$HARBOR_PROJECT/$CI_PROJECT_NAME:latest --tag $HARBOR_HOST/$HARBOR_PROJECT/$CI_PROJECT_NAME:$CI_COMMIT_SHORT_SHA --tag $HARBOR_HOST/$HARBOR_PROJECT/$CI_PROJECT_NAME .
+    - docker push $HARBOR_HOST/$HARBOR_PROJECT/$CI_PROJECT_NAME:$CI_COMMIT_SHORT_SHA
+    - docker push $HARBOR_HOST/$HARBOR_PROJECT/$CI_PROJECT_NAME:latest
+  only:
+    - master
+  tags:
+    - gitlab-runner-docker
+
+
+deploy:
+  stage: deploy
+  variables:
+    DOCKER_HOST: "ssh://sysadmin@10.17.34.15"
+  before_script:
+    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - echo "$CI_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan 10.17.34.15 >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - docker login $HARBOR_HOST -u "$HARBOR_USERNAME" -p "$HARBOR_PASSWORD"
+  script:
+    - docker-compose -f $COMPOSEFILE pull
+    - docker container rm -f $CI_PROJECT_NAME
+    - docker-compose -f $COMPOSEFILE up -d --force-recreate
+  after_script:
+    - docker logout $HARBOR_HOST
+  only:
+    - master
+  tags:
+    - gitlab-runner-docker
