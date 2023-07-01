@@ -24,4 +24,6 @@ See [compose.yaml](/compose.yaml). Note that two ports must be forwarded - one f
 
 # TODO
 
-The plan is to do userfriendly branch (and maybe repos) switching with React.
+The plan is to do user-friendly branch (and maybe repos) switching with React.
+
+
