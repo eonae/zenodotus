@@ -35,12 +35,17 @@ export class AppService {
 
     this.logger.info(`Reloading ref ${ref} ...`);
     this.isReloading = true;
-    this.currentRef = ref;
 
-    await this.fetch(ref);
-    await this.introspection.restart();
+    try {
+      await this.fetch(ref);
+      this.currentRef = ref;
 
-    this.isReloading = false;
+      await this.introspection.restart();
+    } catch (error: unknown) {
+      throw error;
+    } finally {
+      this.isReloading = false;
+    }
   }
 
   private async fetch(ref: string): Promise<void> {

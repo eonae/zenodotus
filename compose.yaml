@@ -3,6 +3,7 @@ services:
   zenodotus:
     build:
       context: .
+    # image: eonae/zenodotus:latest
     ports:
       - 4001:4001
       - 4002:4002
