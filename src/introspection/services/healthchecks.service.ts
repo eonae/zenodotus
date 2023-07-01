@@ -1,13 +1,13 @@
-import { EventEmitter } from 'events';
-
-import { AppConfig } from '../../app.config';
-
 import { Injectable } from '@nestjs/common';
 import { InjectLogger } from '@rsdk/core';
 import { ILogger } from '@rsdk/logging';
 import axios from 'axios';
+import { EventEmitter } from 'node:events';
+
+import { AppConfig } from '../../app.config';
 
 @Injectable()
+// eslint-disable-next-line unicorn/prefer-event-target
 export class HealthchecksService extends EventEmitter {
   private timer: NodeJS.Timer | null = null;
 
@@ -26,7 +26,7 @@ export class HealthchecksService extends EventEmitter {
       try {
         await axios.get('/health');
         this.emit('ok');
-      } catch (err: any) {
+      } catch {
         this.emit('fail');
       }
     }, 2000);

@@ -1,8 +1,3 @@
-import http from 'http';
-
-import type { ErrorDefinition } from './errors';
-import { ERRORS } from './errors';
-
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
@@ -13,14 +8,20 @@ import { json } from 'body-parser';
 import cors from 'cors';
 import express from 'express';
 import { print } from 'graphql';
+import { createServer } from 'node:http';
+
+import type { ErrorDefinition } from './errors';
+import { ERRORS } from './errors';
 
 const fail = (reason: ErrorDefinition, err?: unknown): void => {
   const [code, msg] = reason;
+
   console.log(msg);
   if (err) {
     console.log(err);
   }
 
+  // eslint-disable-next-line unicorn/no-process-exit
   process.exit(code);
 };
 
@@ -29,8 +30,8 @@ const getArgs = (): { port: number; schemasGlob: string } => {
 
   try {
     port = Convert.int(process.argv[2]);
-  } catch (err) {
-    fail(ERRORS.INVALID_PORT, err);
+  } catch (error) {
+    fail(ERRORS.INVALID_PORT, error);
   }
 
   const schemasGlob = process.argv[3];
@@ -54,7 +55,7 @@ const bootstrap = async (): Promise<void> => {
   const { port, schemasGlob } = getArgs();
 
   const app = express();
-  const httpServer = http.createServer(app);
+  const httpServer = createServer(app);
   let apollo: ApolloServer;
 
   try {
@@ -63,18 +64,18 @@ const bootstrap = async (): Promise<void> => {
       resolvers: {},
       plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     });
-  } catch (err) {
-    return fail(ERRORS.INVALID_SCHEMA, err);
+  } catch (error) {
+    return fail(ERRORS.INVALID_SCHEMA, error);
   }
 
   try {
     await apollo.start();
-  } catch (err) {
-    return fail(ERRORS.APOLLO_ERROR, err);
+  } catch (error) {
+    return fail(ERRORS.APOLLO_ERROR, error);
   }
 
   app.use('/graphql', cors(), json(), expressMiddleware(apollo));
-  app.get('/health', (req, res) => {
+  app.get('/health', (_, res) => {
     res.status(200);
     res.send('OK');
   });
@@ -91,4 +92,4 @@ const bootstrap = async (): Promise<void> => {
   );
 };
 
-bootstrap().catch(console.error);
+bootstrap();

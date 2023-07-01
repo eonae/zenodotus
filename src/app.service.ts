@@ -1,15 +1,14 @@
-import { mkdir, rm } from 'fs/promises';
-import path from 'path';
+import { Injectable } from '@nestjs/common';
+import { InjectLogger } from '@rsdk/core';
+import { ILogger } from '@rsdk/logging';
+import { mkdir, rm } from 'node:fs/promises';
+import path from 'node:path';
+import type { SimpleGit } from 'simple-git';
+import createClient from 'simple-git';
 
 import { AppConfig } from './app.config';
 import { WORKDIR } from './constants';
 import { IntrospectionService } from './introspection';
-
-import { Injectable } from '@nestjs/common';
-import { InjectLogger } from '@rsdk/core';
-import { ILogger } from '@rsdk/logging';
-import type { SimpleGit } from 'simple-git';
-import createClient from 'simple-git';
 
 @Injectable()
 export class AppService {

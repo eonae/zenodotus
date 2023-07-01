@@ -2,10 +2,6 @@ clean:
 	rm -rf dist
 	rm -rf node_modules
 
-generate:
-	rm -rf ./merged/*.graphql
-	node node_modules/.bin/ts-node ./generate-typings.ts
-
 install:
 	npm i
 	cp -n .env.example .env || true
@@ -16,7 +12,6 @@ build:
 init:
 	make clean
 	make install
-	make generate
 	make build
 
 rebuild:

@@ -1,9 +1,9 @@
+import { Module } from '@nestjs/common';
+import { PlatformConfigModule } from '@rsdk/core';
+
 import { AppConfig } from '../app.config';
 
 import { HealthchecksService, IntrospectionService } from './services';
-
-import { Module } from '@nestjs/common';
-import { PlatformConfigModule } from '@rsdk/core';
 
 @Module({
   imports: [PlatformConfigModule.forFeature(AppConfig)],

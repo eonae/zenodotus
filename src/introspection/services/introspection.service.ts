@@ -1,17 +1,16 @@
-import { spawn } from 'child_process';
-import { join } from 'path';
-
-import { AppConfig } from '../../app.config';
-import { WORKDIR } from '../../constants';
-
-import { HealthchecksService } from './healthchecks.service';
-
 import { Injectable } from '@nestjs/common';
 import { text } from '@rsdk/common';
 import { InjectLogger } from '@rsdk/core';
 import { ILogger } from '@rsdk/logging';
 import axios from 'axios';
-import type { ChildProcess } from 'child_process';
+import type { ChildProcess } from 'node:child_process';
+import { spawn } from 'node:child_process';
+import { join } from 'node:path';
+
+import { AppConfig } from '../../app.config';
+import { WORKDIR } from '../../constants';
+
+import { HealthchecksService } from './healthchecks.service';
 
 @Injectable()
 export class IntrospectionService {
