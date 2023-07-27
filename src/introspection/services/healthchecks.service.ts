@@ -16,15 +16,17 @@ export class HealthchecksService extends EventEmitter {
     private readonly config: AppConfig,
   ) {
     super();
-    axios.defaults.baseURL = this.config.introspectionBaseUrl.toString();
   }
 
   start(): void {
+    const url = `http://localhost:${this.config.instrospectionInternalPort}/health`;
+
     this.logger.info(`Starting introspection server healthchecks...`);
+    this.logger.info(`Healthcheck url: ${url}`);
 
     this.timer = setInterval(async () => {
       try {
-        await axios.get('/health');
+        await axios.get(url);
         this.emit('ok');
       } catch {
         this.emit('fail');

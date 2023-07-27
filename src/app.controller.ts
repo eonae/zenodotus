@@ -39,7 +39,7 @@ export class AppController {
         <body>
           <div id="voyager">Loading...</div>
           <script>
-            const introspectionProvider = (query) => fetch('${this.config.introspectionBaseUrl}graphql', {
+            const introspectionProvider = (query) => fetch('${this.config.introspectionExternalUrl}', {
               method: 'post',
               headers: {
                 'Accept': 'application/json',

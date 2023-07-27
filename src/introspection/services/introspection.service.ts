@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { text } from '@rsdk/common';
 import { InjectLogger } from '@rsdk/core';
 import { ILogger } from '@rsdk/logging';
-import axios from 'axios';
 import type { ChildProcess } from 'node:child_process';
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
@@ -20,10 +19,7 @@ export class IntrospectionService {
     @InjectLogger(IntrospectionService) private readonly logger: ILogger,
     private readonly healthchecks: HealthchecksService,
     private readonly config: AppConfig,
-  ) {
-    axios.defaults.baseURL = this.config.introspectionBaseUrl.toString();
-    console.log(axios.defaults.baseURL);
-  }
+  ) {}
 
   onModuleDestroy(): void {
     this.stop();
@@ -45,7 +41,7 @@ export class IntrospectionService {
     this.logger.info('Starting introspection server...');
 
     const args = [
-      this.config.introspectionBaseUrl.port,
+      this.config.instrospectionInternalPort.toString(),
       join(WORKDIR, 'contract', this.config.schemasGlob),
     ];
 
@@ -54,7 +50,11 @@ export class IntrospectionService {
         stdio: this.config.inheritStdout ? 'inherit' : 'ignore',
       });
 
-      this.healthchecks.once('ok', resolve);
+      this.healthchecks.once('ok', () => {
+        this.logger.info('Introspection server is up! 🚀');
+        resolve();
+      });
+
       let fails = 0;
 
       const failHandler = (): void => {

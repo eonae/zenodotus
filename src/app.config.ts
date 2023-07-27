@@ -3,6 +3,7 @@ import {
   BoolParser,
   Config,
   ConfigSection,
+  IntParser,
   Property,
   StringParser,
   UrlParser,
@@ -18,12 +19,20 @@ export class AppConfig extends Config {
   })
   repositoryUrl!: URL;
 
-  @Property('INTROSPECTION_BASE_URL', new UrlParser(), {
+  @Property('INTROSPECTION_EXTERNAL_URL', new UrlParser(), {
     description: text`
-      Base url of introspection server. For example: http://localhost:4002
+      Url that will be used by frontend to get introspection.
     `,
   })
-  introspectionBaseUrl!: URL;
+  introspectionExternalUrl!: URL;
+
+  @Property('INTROSPECTION_INTERNAL_PORT', new IntParser(), {
+    description: text`
+      Port that will be used for introspection internally inside
+      of container. 
+    `,
+  })
+  instrospectionInternalPort!: number;
 
   @Property('SCHEMAS_GLOB', new StringParser(), {
     description: 'Glob pattern for schemas in contract repositories',

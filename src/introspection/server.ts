@@ -51,6 +51,10 @@ const readTypeDefs = (glob: string): string => {
   return print(mergedSchema);
 };
 
+const log = (msg: string): void => {
+  console.log(`[INTROSPECTION SERVER]: ${msg}`);
+};
+
 const bootstrap = async (): Promise<void> => {
   const { port, schemasGlob } = getArgs();
 
@@ -74,19 +78,23 @@ const bootstrap = async (): Promise<void> => {
     return fail(ERRORS.APOLLO_ERROR, error);
   }
 
-  app.use('/graphql', cors(), json(), expressMiddleware(apollo));
   app.get('/health', (_, res) => {
     res.status(200);
     res.send('OK');
   });
 
+  app.use('/', cors(), json(), expressMiddleware(apollo));
+
   httpServer.on('error', (err) => {
     fail(ERRORS.SERVER_ERROR, err);
   });
 
+  log(`starting on port ${port}...`);
+  log(`pid: ${process.pid}`);
+
   await new Promise<void>((resolve) =>
     httpServer.listen({ port }, () => {
-      console.log(`Serving introspection on port ${port} ...`);
+      log(`Success! Serving...`);
       resolve();
     }),
   );
